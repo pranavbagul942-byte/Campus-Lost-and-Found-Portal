@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.type in ['lost', 'found']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 70
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 500
+        && request.resource.data.contactEmail is string
+        && request.resource.data.contactEmail.size() <= 120;
+      allow update, delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
